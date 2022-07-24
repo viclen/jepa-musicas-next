@@ -1,10 +1,11 @@
 import { database } from '../firebaseConfig';
-import { collection, addDoc, DocumentData, WithFieldValue, DocumentReference } from 'firebase/firestore';
+import { collection, addDoc, DocumentData, WithFieldValue, getDocs, Query } from 'firebase/firestore';
 import { Song } from './types';
 
 const dbInstance = collection(database, 'songs');
 
 const create = (data: WithFieldValue<DocumentData>) => addDoc(dbInstance, data);
+const list = () => getDocs(dbInstance);
 
 export const createSong = async (songData: Song): Promise<Song | null> => {
   try {
@@ -18,3 +19,9 @@ export const createSong = async (songData: Song): Promise<Song | null> => {
     return null;
   }
 };
+
+export const getAllSongs = async (): Promise<Array<Song>> => {
+  const docs = await (await list()).docs;
+
+  return docs.map((doc) => ({ id: doc.id, ...doc.data() as Song }));
+}
